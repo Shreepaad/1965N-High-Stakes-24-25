@@ -90,10 +90,10 @@ void opcontrol() {
 
 
 	std::shared_ptr<XDriveModel> drive  = std::make_shared<XDriveModel>(
-        std::make_shared<Motor>(1),   // Top left motor
-        std::make_shared<Motor>(-2),  // Top right motor (reversed)
-        std::make_shared<Motor>(-3),  // Bottom right motor (reversed)
-        std::make_shared<Motor>(4),   // Bottom left motor
+        std::make_shared<Motor>(5),   // Top left motor
+        std::make_shared<Motor>(-4),  // Top right motor (reversed)
+        std::make_shared<Motor>(7),  // Bottom right motor (reversed)
+        std::make_shared<Motor>(-16),   // Bottom left motor
 		std::make_shared<RotationSensor>(1, false),
 		std::make_shared<RotationSensor>(2, false),
         // 11.5_in  // Track width
@@ -101,15 +101,17 @@ void opcontrol() {
 		12000.0
     );
 
-	pros::Motor motor1(1);
-    pros::Motor motor2(2, true);  // Reversed
-    pros::Motor motor3(3, true);  // Reversed
-    pros::Motor motor4(4);
+	// pros::Motor motor1(5);
+    // pros::Motor motor2(4);  // Reversed
+    // pros::Motor motor3(7);  // Reversed
+    // pros::Motor motor4(16);
+	// Motor motor1(5);
+	// Motor motor2(-4);
+	// Motor motor3(-7);
+	// Motor motor4(16);
 
 	while (true) {
-		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+	
 		// int left = master.get_analog(ANALOG_LEFT_Y);
 		// int right = master.get_analog(ANALOG_RIGHT_Y);
 
@@ -117,34 +119,48 @@ void opcontrol() {
 		// right_mtr = right;
 
 
-		double forward = master.getAnalog(ControllerAnalog::leftY);
+		double forwardd = master.getAnalog(ControllerAnalog::leftY);
         double strafe = master.getAnalog(ControllerAnalog::leftX);
         double turn = master.getAnalog(ControllerAnalog::rightX);
+		// std::string s = "";
+		// s += forward;
 
 		// drive -> getModel() -> xArcade(1.0, 2.0, 3.0, 3.0);
-        drive -> xArcade(strafe, forward, turn);
+        drive -> xArcade(turn, forwardd, strafe);
+			// drive -> xArcade(forward, turn);
+			// drive -> forward(2);
+
+	// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
+	// 	                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
+	// 	                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+
+ 		// pros::lcd::set_text(2, s);
 
 
+		// std::cout << forward << " " << strafe << " " << turn << std::endl;
+		// double m1speed = forward + strafe + turn;  // Top left
+		// double m2speed = forward - strafe - turn;  // Top right
+		// double m3speed = forward + strafe - turn;  // Bottom right
+		// double m4speed = forward - strafe + turn;  // Bottom left
+		// double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
+		// if (maxSpeed > 0.0) {
+		// 	double scaleFactor = 600.0 / maxSpeed;
+		// 	m1speed *= scaleFactor;
+		// 	m2speed *= scaleFactor;
+		// 	m3speed *= scaleFactor;
+		// 	m4speed *= scaleFactor;
+    	// }
+		// motor1.moveVelocity(m1speed);
+		// motor2.moveVelocity(m2speed);
+		// motor3.moveVelocity(m3speed);
+		// motor4.moveVelocity(m4speed);
 
-
-
-
-		double m1speed = forward + strafe + turn;  // Top left
-		double m2speed = forward - strafe - turn;  // Top right
-		double m3speed = forward + strafe - turn;  // Bottom right
-		double m4speed = forward - strafe + turn;  // Bottom left
-		double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
-		if (maxSpeed > 127) {
-			double scaleFactor = 127 / maxSpeed;
-			m1speed *= scaleFactor;
-			m2speed *= scaleFactor;
-			m3speed *= scaleFactor;
-			m4speed *= scaleFactor;
-    	}
-		motor1.move(m1speed);
-		motor2.move(m2speed);
-		motor3.move(m3speed);
-		motor4.move(m4speed);
+		 if (forwardd > 0 or strafe > 0 or turn > 0) {
+                                drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+                        }
+                        else {
+                                drive->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+                        }
 
 
 
