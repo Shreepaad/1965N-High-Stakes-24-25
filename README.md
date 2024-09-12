@@ -1,8 +1,9 @@
 
-![](/media/Stevenson_vex_logo.png "Stevenson Robotics 2021-2022")
+![image](https://github.com/user-attachments/assets/f759a265-2de5-4e13-8393-bdab9ff4ba51)
 # BURNTOUT (1965 N)
-![](/media/robot.jpg "1965N")
-## Designed for the 2023-2024 VRC [Over-Under](https://www.vexrobotics.com/v5/competition/vrc-current-game).
+![robot-min](https://github.com/user-attachments/assets/9f300d3c-fad4-4f73-ab05-3861a1061312)
+
+## Designed for the 2024-2025 VRC.
 
 ## **The Team:**
 - Dylan Patel
@@ -31,4 +32,3 @@
 
 
 ## LAST EDIT: (9/11/2024), 7:26 PM 
-## 	FINAL EDIT 🔥🔥🔥🔥
