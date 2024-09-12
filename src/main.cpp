@@ -74,9 +74,9 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	pros::Controller master(pros::E_CONTROLLER_MASTER);
-	pros::Motor left_mtr(1);
-	pros::Motor right_mtr(2);
+	Controller master;
+	// pros::Motor left_mtr(1);
+	// pros::Motor right_mtr(2);
 
 	// std::shared_ptr<ChassisController> drive = 
 	// 	ChassisControllerBuilder()
@@ -101,6 +101,11 @@ void opcontrol() {
 		12000.0
     );
 
+	pros::Motor motor1(1);
+    pros::Motor motor2(2, true);  // Reversed
+    pros::Motor motor3(3, true);  // Reversed
+    pros::Motor motor4(4);
+
 	while (true) {
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
@@ -111,14 +116,36 @@ void opcontrol() {
 		// left_mtr = left;
 		// right_mtr = right;
 
+
+		double forward = master.getAnalog(ControllerAnalog::leftY);
+        double strafe = master.getAnalog(ControllerAnalog::leftX);
+        double turn = master.getAnalog(ControllerAnalog::rightX);
+
 		// drive -> getModel() -> xArcade(1.0, 2.0, 3.0, 3.0);
+        drive -> xArcade(strafe, forward, turn);
 
-		double forward = master.get_analog(ANALOG_LEFT_Y);
-        double strafe = master.get_analog(ANALOG_LEFT_X);
-        double turn = master.get_analog(ANALOG_RIGHT_X);
 
-        // Use xArcade() for X-drive control
-        drive -> xArcade(forward, strafe, turn);
+
+
+
+
+		double m1speed = forward + strafe + turn;  // Top left
+		double m2speed = forward - strafe - turn;  // Top right
+		double m3speed = forward + strafe - turn;  // Bottom right
+		double m4speed = forward - strafe + turn;  // Bottom left
+		double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
+		if (maxSpeed > 127) {
+			double scaleFactor = 127 / maxSpeed;
+			m1speed *= scaleFactor;
+			m2speed *= scaleFactor;
+			m3speed *= scaleFactor;
+			m4speed *= scaleFactor;
+    	}
+		motor1.move(m1speed);
+		motor2.move(m2speed);
+		motor3.move(m3speed);
+		motor4.move(m4speed);
+
 
 
 		pros::delay(20);
