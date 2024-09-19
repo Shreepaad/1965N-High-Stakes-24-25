@@ -130,30 +130,24 @@ void opcontrol() {
 			// drive -> xArcade(forward, turn);
 			// drive -> forward(2);
 
-	// pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
-	// 	                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
-	// 	                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
-
- 		// pros::lcd::set_text(2, s);
-
 
 		// std::cout << forward << " " << strafe << " " << turn << std::endl;
-		// double m1speed = forward + strafe + turn;  // Top left
-		// double m2speed = forward - strafe - turn;  // Top right
-		// double m3speed = forward + strafe - turn;  // Bottom right
-		// double m4speed = forward - strafe + turn;  // Bottom left
-		// double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
-		// if (maxSpeed > 0.0) {
-		// 	double scaleFactor = 600.0 / maxSpeed;
-		// 	m1speed *= scaleFactor;
-		// 	m2speed *= scaleFactor;
-		// 	m3speed *= scaleFactor;
-		// 	m4speed *= scaleFactor;
-    	// }
-		// motor1.moveVelocity(m1speed);
-		// motor2.moveVelocity(m2speed);
-		// motor3.moveVelocity(m3speed);
-		// motor4.moveVelocity(m4speed);
+		double m1speed = forward + turn + strafe;  // Top left
+		double m2speed = forward - turn - strafe;  // Top right
+		double m3speed = forward + turn - strafe;  // Bottom right
+		double m4speed = forward - turn + strafe;  // Bottom left
+		double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
+		if (maxSpeed > 0.0) {
+			double scaleFactor = 600.0 / maxSpeed;
+			m1speed *= scaleFactor;
+			m2speed *= scaleFactor;
+			m3speed *= scaleFactor;
+			m4speed *= scaleFactor;
+    	}
+		motor1.moveVelocity(m1speed);
+		motor2.moveVelocity(m2speed);
+		motor3.moveVelocity(m3speed);
+		motor4.moveVelocity(m4speed);
 
 		 if (forwardd > 0 or strafe > 0 or turn > 0) {
                                 drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
