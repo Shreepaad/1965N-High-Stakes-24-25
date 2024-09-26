@@ -89,17 +89,33 @@ void opcontrol() {
 	// 		.build();
 
 
-	std::shared_ptr<XDriveModel> drive  = std::make_shared<XDriveModel>(
-        std::make_shared<Motor>(5),   // Top left motor
-        std::make_shared<Motor>(-4),  // Top right motor (reversed)
-        std::make_shared<Motor>(7),  // Bottom right motor (reversed)
-        std::make_shared<Motor>(-16),   // Bottom left motor
-		std::make_shared<RotationSensor>(1, false),
-		std::make_shared<RotationSensor>(2, false),
-        // 11.5_in  // Track width
-		600.0,
-		12000.0
-    );
+	// std::shared_ptr<XDriveModel> drive  = std::make_shared<XDriveModel>(
+    //     std::make_shared<Motor>(5),   // Top left motor
+    //     std::make_shared<Motor>(-4),  // Top right motor (reversed)
+    //     std::make_shared<Motor>(7),  // Bottom right motor (reversed)
+    //     std::make_shared<Motor>(-16),   // Bottom left motor
+	// 	std::make_shared<RotationSensor>(1, false),
+	// 	std::make_shared<RotationSensor>(2, false),
+    //     // 11.5_in  // Track width
+	// 	600.0,
+	// 	12000.0
+    // );
+
+
+	std::shared_ptr<okapi::OdomChassisController> drive1 =
+        okapi::ChassisControllerBuilder()
+                .withMotors(
+                                5,
+                                -4,
+                                7,
+                                -16
+                           )
+                .withDimensions({okapi::AbstractMotor::gearset::blue, (1.0/1.0)}, {{2.75_in, 10.75_in}, okapi::imev5BlueTPR})
+                .withOdometry()
+                .buildOdometry();
+
+auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) };
+
 
 	// pros::Motor motor1(5);
     // pros::Motor motor2(4);  // Reversed
@@ -110,6 +126,8 @@ void opcontrol() {
 	// Motor motor3(-7);
 	// Motor motor4(16);
 
+	// okapi::Motor test(14);
+
 	while (true) {
 	
 		// int left = master.get_analog(ANALOG_LEFT_Y);
@@ -117,7 +135,7 @@ void opcontrol() {
 
 		// left_mtr = left;
 		// right_mtr = right;
-
+		// test.moveVelocity(200);	
 
 		double forwardd = master.getAnalog(ControllerAnalog::leftY);
         double strafe = master.getAnalog(ControllerAnalog::leftX);
@@ -127,27 +145,34 @@ void opcontrol() {
 
 		// drive -> getModel() -> xArcade(1.0, 2.0, 3.0, 3.0);
         drive -> xArcade(turn, forwardd, strafe);
+		// std::string test = "";
+		// test += drive -> getTopLeftMotor() -> getActualVelocity();
+
+		// master.setText(0, 0, test);
+
+
+
 			// drive -> xArcade(forward, turn);
 			// drive -> forward(2);
 
 
-		// std::cout << forward << " " << strafe << " " << turn << std::endl;
-		double m1speed = forward + turn + strafe;  // Top left
-		double m2speed = forward - turn - strafe;  // Top right
-		double m3speed = forward + turn - strafe;  // Bottom right
-		double m4speed = forward - turn + strafe;  // Bottom left
-		double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
-		if (maxSpeed > 0.0) {
-			double scaleFactor = 600.0 / maxSpeed;
-			m1speed *= scaleFactor;
-			m2speed *= scaleFactor;
-			m3speed *= scaleFactor;
-			m4speed *= scaleFactor;
-    	}
-		motor1.moveVelocity(m1speed);
-		motor2.moveVelocity(m2speed);
-		motor3.moveVelocity(m3speed);
-		motor4.moveVelocity(m4speed);
+		// std::cout << forwardd << " " << strafe << " " << turn << std::endl;
+		// double m1speed = forward + turn + strafe;  // Top left
+		// double m2speed = forward - turn - strafe;  // Top right
+		// double m3speed = forward + turn - strafe;  // Bottom right
+		// double m4speed = forward - turn + strafe;  // Bottom left
+		// double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
+		// if (maxSpeed > 0.0) {
+		// 	double scaleFactor = 600.0 / maxSpeed;
+		// 	m1speed *= scaleFactor;
+		// 	m2speed *= scaleFactor;
+		// 	m3speed *= scaleFactor;
+		// 	m4speed *= scaleFactor;
+    	// }
+		// motor1.moveVelocity(m1speed);
+		// motor2.moveVelocity(m2speed);
+		// motor3.moveVelocity(m3speed);
+		// motor4.moveVelocity(m4speed);
 
 		 if (forwardd > 0 or strafe > 0 or turn > 0) {
                                 drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
