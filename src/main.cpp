@@ -107,8 +107,8 @@ void opcontrol() {
                 .withMotors(
                                 5,
                                 -4,
-                                7,
-                                -16
+                                -7,
+                                16
                            )
                 .withDimensions({okapi::AbstractMotor::gearset::blue, (1.0/1.0)}, {{2.75_in, 10.75_in}, okapi::imev5BlueTPR})
                 .withOdometry()
@@ -135,7 +135,7 @@ auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) }
 
 		// left_mtr = left;
 		// right_mtr = right;
-		// test.moveVelocity(200);	
+		// test.moveVelocity(-200);
 
 		double forwardd = master.getAnalog(ControllerAnalog::leftY);
         double strafe = master.getAnalog(ControllerAnalog::leftX);
@@ -144,7 +144,7 @@ auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) }
 		// s += forward;
 
 		// drive -> getModel() -> xArcade(1.0, 2.0, 3.0, 3.0);
-        drive -> xArcade(turn, forwardd, strafe);
+        drive -> xArcade(strafe, forwardd, turn);
 		// std::string test = "";
 		// test += drive -> getTopLeftMotor() -> getActualVelocity();
 
