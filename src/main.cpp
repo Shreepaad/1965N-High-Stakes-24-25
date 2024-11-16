@@ -105,10 +105,12 @@ void opcontrol() {
 	std::shared_ptr<okapi::OdomChassisController> drive1 =
         okapi::ChassisControllerBuilder()
                 .withMotors(
-                                5,
+								11,
+                                // 5,
                                 -4,
                                 -7,
-                                16
+                                // 16
+								8
                            )
                 .withDimensions({okapi::AbstractMotor::gearset::blue, (1.0/1.0)}, {{2.75_in, 10.75_in}, okapi::imev5BlueTPR})
                 .withOdometry()
@@ -124,18 +126,42 @@ auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) }
 	// Motor motor1(5);
 	// Motor motor2(-4);
 	// Motor motor3(-7);
+	// auto mtr = ADIMotor('A');
+	// pros::adi::DigitalOut test('A', false, false);
+	// pros::ADIMotor mtr('A');
+	pros::ADIDigitalOut test('A');
+	test.set_value(0);
+
 	// Motor motor4(16);
 
-	// okapi::Motor test(14);
+	okapi::Motor conveyer(5);
+	okapi::Motor intake(1);
 
 	while (true) {
-	
+		if(master.getDigital(ControllerDigital::L1)) test.set_value(1);
+		else test.set_value(0);
+
+		// test.set_value(1);
+		// pros::delay(10000);
+		// test.set_value(0);
+
 		// int left = master.get_analog(ANALOG_LEFT_Y);
 		// int right = master.get_analog(ANALOG_RIGHT_Y);
 
 		// left_mtr = left;
 		// right_mtr = right;
-		// test.moveVelocity(-200);
+
+		if(master.getDigital(ControllerDigital::X)) {
+			intake.moveVelocity(-200);
+			conveyer.moveVelocity(200);
+		} else {
+			intake.moveVelocity(0);
+			conveyer.moveVelocity(0);
+		}
+
+		// intake.moveVelocity(-200);
+		// motor
+
 
 		double forwardd = master.getAnalog(ControllerAnalog::leftY);
         double strafe = master.getAnalog(ControllerAnalog::leftX);
