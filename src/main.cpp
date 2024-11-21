@@ -102,27 +102,52 @@ void opcontrol() {
     // );
 
 
-	std::shared_ptr<okapi::OdomChassisController> drive1 =
-        okapi::ChassisControllerBuilder()
-                .withMotors(
-								11,
-                                // 5,
-                                -4,
-                                -7,
-                                // 16
-								8
-                           )
-                .withDimensions({okapi::AbstractMotor::gearset::blue, (1.0/1.0)}, {{2.75_in, 10.75_in}, okapi::imev5BlueTPR})
-                .withOdometry()
-                .buildOdometry();
-
-auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) };
+	// std::shared_ptr<okapi::ChassisController> drive1 =
+    //     okapi::ChassisControllerBuilder()
+    //             .withMotors(
+	// 							1,
+    //                             -4,
+    //                             -7,
+	// 							5
+    //                        )
+    //             .withDimensions({okapi::AbstractMotor::gearset::blue, (1.0/1.0)}, {{2.75_in, 15_in}, okapi::imev5BlueTPR})
+    //             .withOdometry()
+    //             .buildOdometry();
 
 
-	// pros::Motor motor1(5);
-    // pros::Motor motor2(4);  // Reversed
-    // pros::Motor motor3(7);  // Reversed
-    // pros::Motor motor4(16);
+				
+
+// auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) };
+
+// drive -> getBottomLeftMotor() -> setVoltageLimit(2000);
+// drive -> getBottomRightMotor() -> setVoltageLimit(2000);
+// drive -> getTopLeftMotor() -> setVoltageLimit(2000);
+// drive -> getTopRightMotor() -> setVoltageLimit(2000);
+
+
+
+
+// std::shared_ptr<AsyncMotionProfileController> profileController =
+//   AsyncMotionProfileControllerBuilder()
+//     .withLimits({
+//       1.0, // Maximum linear velocity of the Chassis in m/s
+//       2.0, // Maximum linear acceleration of the Chassis in m/s/s
+//       10.0 // Maximum linear jerk of the Chassis in m/s/s/s
+//     })
+//     .withOutput(drive1)
+//     .buildMotionProfileController();
+
+
+
+	// drive1->moveDistance(1_m);
+
+
+
+
+	okapi::Motor motor1(1);
+    okapi::Motor motor2(4);  // Reversed
+    okapi::Motor motor3(7);  // Reversed
+    okapi::Motor motor4(5);
 	// Motor motor1(5);
 	// Motor motor2(-4);
 	// Motor motor3(-7);
@@ -148,6 +173,7 @@ auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) }
 		// int left = master.get_analog(ANALOG_LEFT_Y);
 		// int right = master.get_analog(ANALOG_RIGHT_Y);
 
+
 		// left_mtr = left;
 		// right_mtr = right;
 
@@ -161,16 +187,19 @@ auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) }
 
 		// intake.moveVelocity(-200);
 		// motor
+		
 
-
-		double forwardd = master.getAnalog(ControllerAnalog::leftY);
-        double strafe = master.getAnalog(ControllerAnalog::leftX);
-        double turn = master.getAnalog(ControllerAnalog::rightX);
-		// std::string s = "";
-		// s += forward;
+		double strafe = master.getAnalog(ControllerAnalog::leftY);
+        // double strafe = master.getAnalog(ControllerAnalog::rightY);
+		double turn = master.getAnalog(ControllerAnalog::leftX);
+        double forwardd = master.getAnalog(ControllerAnalog::rightX);
+		std::string s = "";
+		s += forwardd;
+		// master.clearLine(0);
+		master.setText(0,0, s);
 
 		// drive -> getModel() -> xArcade(1.0, 2.0, 3.0, 3.0);
-        drive -> xArcade(strafe, forwardd, turn);
+		// drive -> xArcade(strafe, forwardd, turn);
 		// std::string test = "";
 		// test += drive -> getTopLeftMotor() -> getActualVelocity();
 
@@ -183,30 +212,33 @@ auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) }
 
 
 		// std::cout << forwardd << " " << strafe << " " << turn << std::endl;
-		// double m1speed = forward + turn + strafe;  // Top left
-		// double m2speed = forward - turn - strafe;  // Top right
-		// double m3speed = forward + turn - strafe;  // Bottom right
-		// double m4speed = forward - turn + strafe;  // Bottom left
-		// double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
-		// if (maxSpeed > 0.0) {
-		// 	double scaleFactor = 600.0 / maxSpeed;
-		// 	m1speed *= scaleFactor;
-		// 	m2speed *= scaleFactor;
-		// 	m3speed *= scaleFactor;
-		// 	m4speed *= scaleFactor;
-    	// }
-		// motor1.moveVelocity(m1speed);
-		// motor2.moveVelocity(m2speed);
-		// motor3.moveVelocity(m3speed);
-		// motor4.moveVelocity(m4speed);
+		double m1speed = forwardd + turn + strafe;  // Top left
+		double m2speed = forwardd - turn - strafe;  // Top right
+		double m3speed = forwardd + turn - strafe;  // Bottom right
+		double m4speed = forwardd - turn + strafe;  // Bottom left
+		double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
+		if (maxSpeed > 0.0) {
+			double scaleFactor = 600.0 / maxSpeed;
+			m1speed *= scaleFactor;
+			m2speed *= scaleFactor;
+			m3speed *= scaleFactor;
+			m4speed *= scaleFactor;
+    	}
+		motor1.moveVelocity(m1speed);
+		motor2.moveVelocity(m2speed);
+		motor3.moveVelocity(m3speed);
+		motor4.moveVelocity(m4speed);
 
-		 if (forwardd > 0 or strafe > 0 or turn > 0) {
-                                drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-                        }
-                        else {
-                                drive->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-                        }
 
+
+		//  if (forwardd > 0 or strafe > 0 or turn > 0) {
+        //                         drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+        //                 }
+        //                 else {
+        //                         drive->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+        //                 }
+
+		// std::cout << drive -> getBottomLeftMotor() -> getActualVelocity() << std::endl;
 
 
 		pros::delay(20);
