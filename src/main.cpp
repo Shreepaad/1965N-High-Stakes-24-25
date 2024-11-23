@@ -41,7 +41,7 @@ void initialize() {
 	pros::lcd::register_btn1_cb(on_center_button);
 
 	FR.setReversed(true);
-    RR.setReversed(true);
+    	RR.setReversed(true);
 	tower.set_value(0);
 }
 
