@@ -131,12 +131,17 @@ void opcontrol() {
 
 		
 		//Active Breaking
-		//  if (forwardd > 0 or strafe > 0 or turn > 0) {
-        //                         drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-        //                 }
-        //                 else {
-        //                         drive->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-        //                 }
+		 if (forwardd > 0 or strafe > 0 or turn > 0) {
+			 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+			 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+			 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+			 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		 } else {
+			 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+			 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+			 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+			 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		 }
 
 
 		pros::delay(20);
