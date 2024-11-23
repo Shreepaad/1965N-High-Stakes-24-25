@@ -107,7 +107,7 @@ void opcontrol() {
 
 		double strafe = master.getAnalog(ControllerAnalog::leftX);
 		double turn = master.getAnalog(ControllerAnalog::rightX);
-        double forwardd = master.getAnalog(ControllerAnalog::leftY);
+        	double forwardd = master.getAnalog(ControllerAnalog::leftY);
 	
 		//FL(1)
 		//FR(4)
