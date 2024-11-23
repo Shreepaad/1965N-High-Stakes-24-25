@@ -4,9 +4,9 @@ Controller master;
 
 //Right Side Motors are Reversed
 okapi::Motor FL(1);
-okapi::Motor FR(4, true);
+okapi::Motor FR(4);
 okapi::Motor RL(5);
-okapi::Motor RR(7, true);
+okapi::Motor RR(7);
 	
 pros::ADIDigitalOut tower('A');
 okapi::Motor conveyer(5);
@@ -40,6 +40,8 @@ void initialize() {
 
 	pros::lcd::register_btn1_cb(on_center_button);
 
+	FR.setReversed(true);
+    RR.setReversed(true);
 	tower.set_value(0);
 }
 
@@ -116,7 +118,7 @@ void opcontrol() {
 		double FRspeed = forwardd - turn - strafe;
 		double RLspeed = forwardd + turn - strafe;
 		double RRspeed = forwardd - turn + strafe;
-		double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
+		double maxSpeed = std::max({fabs(FLspeed), fabs(FRspeed), fabs(RLspeed), fabs(RRspeed)});
 		if (maxSpeed > 0.0) {
 			double scaleFactor = 600.0 / maxSpeed;
 			FLspeed *= scaleFactor;
