@@ -1,5 +1,17 @@
 #include "main.h"
 
+Controller master;
+
+//Right Side Motors are Reversed
+okapi::Motor FL(1);
+okapi::Motor FR(4, true);
+okapi::Motor RL(5);
+okapi::Motor RR(7, true);
+	
+pros::ADIDigitalOut tower('A');
+okapi::Motor conveyer(5);
+okapi::Motor intake(1);
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -27,6 +39,8 @@ void initialize() {
 	pros::lcd::set_text(1, "Hello PROS User!");
 
 	pros::lcd::register_btn1_cb(on_center_button);
+
+	tower.set_value(0);
 }
 
 /**
@@ -74,20 +88,6 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	Controller master;
-
-	//Right Side Motors are Reversed
-	okapi::Motor FL(1);
-	okapi::Motor FR(4, true);
-	okapi::Motor RL(5);
-	okapi::Motor RR(7, true);
-	
-	pros::ADIDigitalOut tower('A');
-	okapi::Motor conveyer(5);
-	okapi::Motor intake(1);
-
-	tower.set_value(0);
-	
 	while (true) {
 		//Handle pneumatics
 		if(master.getDigital(ControllerDigital::L1)) tower.set_value(1);
