@@ -9,10 +9,56 @@ okapi::Motor RL(5);
 okapi::Motor RR(7);
 	
 pros::ADIDigitalOut tower('A');
-okapi::Motor conveyer(5);
-okapi::Motor intake(1);
+okapi::Motor conveyer(9);
+okapi::Motor intake(10);
 
+pros::IMU imu_sensor(16);
 
+double FLspeed;
+double FRspeed;
+double RLspeed;
+double RRspeed;
+
+double wheelDiameter = 2.75;
+double ticksPerRev = 900.0;
+double wheelCicumference = M_PI * wheelDiameter;
+double ticksPerInch = ticksPerRev/wheelCicumference;
+
+//speed between 0 and 600
+void moveForward(double speed, double distanceInInches) {
+	double targetHeading = imu_sensor.get_heading();
+	double targetTicks = fabs(distanceInInches) * ticksPerInch * sqrt(2);
+
+	FR.tarePosition();
+	FL.tarePosition();
+	RL.tarePosition();
+	RR.tarePosition();
+
+	double direction = (distanceInInches > 0.0) ? 1.0 : -1.0;
+
+	while(fabs(FL.getPosition()) < targetTicks) {
+		double currentHeading = imu_sensor.get_heading();
+
+		double error = targetHeading - currentHeading;
+
+		if(error > 180) error -= 360;
+		if(error < -180) error += 360;
+
+		double correction = error * 2;
+
+		FL.moveVelocity(direction * speed + correction);
+		FR.moveVelocity(direction * speed - correction);
+		RL.moveVelocity(direction * speed + correction);
+		RR.moveVelocity(direction * speed - correction);
+
+		pros::delay(20);
+	}
+	
+	FL.moveVelocity(0);
+	FR.moveVelocity(0);
+	RL.moveVelocity(0);
+	RR.moveVelocity(0);
+}
 
 /**
  * A callback function for LLEMU's center button.
@@ -37,13 +83,11 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
-
-	pros::lcd::register_btn1_cb(on_center_button);
+	imu_sensor.reset();
+	pros::delay(2000);
 
 	FR.setReversed(true);
-    	RR.setReversed(true);
+    RR.setReversed(true);
 	tower.set_value(0);
 }
 
@@ -76,7 +120,9 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+void autonomous() {
+	moveForward(600.0, 12.0);
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -92,20 +138,49 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
+	int ct = 0;
+	bool intakeOn = false;
+
 	while (true) {
 		//Handle pneumatics
 		if(master.getDigital(ControllerDigital::L1)) tower.set_value(1);
 		else tower.set_value(0);
 
 		//Handle intake
-		if(master.getDigital(ControllerDigital::X)) {
+		if(intakeOn) {
 			intake.moveVelocity(-200);
 			conveyer.moveVelocity(200);
 		} else {
 			intake.moveVelocity(0);
 			conveyer.moveVelocity(0);
 		}
+
+		if(master.getDigital(ControllerDigital::X)) {
+			if(!intakeOn) intakeOn = true;
+			else intakeOn = false;
+		}
+
+		ct++;	
+		// master.setText(0,0, std::to_string(ct));
+		if(ct == 100) {
+			ct = 0;
+			FLspeed = FL.getActualVelocity();
+			FRspeed = FR.getActualVelocity();
+			RLspeed = RL.getActualVelocity();
+			master.clear();
+			RRspeed = RR.getActualVelocity();
+
+			// master.setText(0, 0, "FL: ");
+			// master.setText(0, 8, "FR: ");
+			// master.setText(1, 0, "RL: ");
+			// master.setText(1, 8, "RR: ");
+		}
 		
+			master.setText(1, 0, "FL: " + std::to_string((FLspeed)).substr(0,4) + " FR: " + std::to_string(FRspeed).substr(0,4));
+			master.setText(2, 0, "RL: " + std::to_string((RLspeed)).substr(0,4) + " RR: " + std::to_string(RRspeed).substr(0,4));
+			// master.setText(0, 10, "FR: " + std::to_string(static_cast<int>(FRspeed)));
+			// master.setText(1, 0, "RL: " + std::to_string(static_cast<int>(RLspeed)));
+			// master.setText(1, 8, "RR: " + std::to_string(static_cast<int>(RRspeed)));
 
 		double strafe = master.getAnalog(ControllerAnalog::leftX);
 		double turn = master.getAnalog(ControllerAnalog::rightX);
