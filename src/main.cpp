@@ -12,6 +12,8 @@ pros::ADIDigitalOut tower('A');
 okapi::Motor conveyer(5);
 okapi::Motor intake(1);
 
+
+
 /**
  * A callback function for LLEMU's center button.
  *
@@ -107,7 +109,7 @@ void opcontrol() {
 
 		double strafe = master.getAnalog(ControllerAnalog::leftX);
 		double turn = master.getAnalog(ControllerAnalog::rightX);
-        	double forwardd = master.getAnalog(ControllerAnalog::leftY);
+        double forwardd = master.getAnalog(ControllerAnalog::leftY);
 	
 		//FL(1)
 		//FR(4)
@@ -132,18 +134,18 @@ void opcontrol() {
 		RR.moveVelocity(RRspeed);
 
 		
-		//Active Breaking
-		 // if (forwardd > 0 or strafe > 0 or turn > 0) {
-			//  FL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-			//  FR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-			//  RL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-			//  RR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-		 // } else {
-			//  FL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-			//  FR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-			//  RL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-			//  RR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-		 // }
+		// Active Breaking
+		 if (fabs(forwardd) > 0 or fabs(strafe) > 0 or fabs(turn) > 0) {
+			 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+			 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+			 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+			 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		 } else {
+			 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+			 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+			 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+			 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		 }
 
 
 		pros::delay(20);
