@@ -24,48 +24,64 @@ double ticksPerRev = 900.0;
 double wheelCicumference = M_PI * wheelDiameter;
 double ticksPerInch = ticksPerRev/wheelCicumference;
 
+double robotRadius = 8.5;
+
 //speed between 0 and 600
 void moveForward(double speed, double distanceInInches) {
-	double targetHeading = imu_sensor.get_heading();
-	double targetTicks = fabs(distanceInInches) * ticksPerInch * sqrt(2);
+	// double targetHeading = imu_sensor.get_heading();
+	double targetTicks = ((fabs(distanceInInches) * ticksPerInch) / sqrt(2))/64;
 
-	FR.tarePosition();
-	FL.tarePosition();
-	RL.tarePosition();
-	RR.tarePosition();
+	// FR.tarePosition();
+	// FL.tarePosition();
+	// RL.tarePosition();
+	// RR.tarePosition();
 
-	double direction = (distanceInInches > 0.0) ? 1.0 : -1.0;
+	// double direction = (distanceInInches > 0.0) ? 1.0 : -1.0;
 
-	while(fabs(FL.getPosition()) < targetTicks) {
-		double currentHeading = imu_sensor.get_heading();
+	// while(fabs(FL.getPosition()) < targetTicks) {
+	// 	double currentHeading = imu_sensor.get_heading();
 
-		double error = targetHeading - currentHeading;
+	// 	double error = targetHeading - currentHeading;
 
-		if(error > 180) error -= 360;
-		if(error < -180) error += 360;
+	// 	if(error > 180) error -= 360;
+	// 	if(error < -180) error += 360;
 
-		double correction = error * 2;
+	// 	double correction = error * 2;
 
-		FL.moveVelocity(direction * speed + correction);
-		FR.moveVelocity(direction * speed - correction);
-		RL.moveVelocity(direction * speed + correction);
-		RR.moveVelocity(direction * speed - correction);
+	// 	FL.moveVelocity(direction * speed + correction);
+	// 	FR.moveVelocity(direction * speed - correction);
+	// 	RL.moveVelocity(direction * speed + correction);
+	// 	RR.moveVelocity(direction * speed - correction);
 
-		pros::delay(20);
-	}
+	// 	pros::delay(20);
+	// }
 	
-	FL.moveVelocity(0);
-	FR.moveVelocity(0);
-	RL.moveVelocity(0);
-	RR.moveVelocity(0);
+	// FL.moveVelocity(0);
+	// FR.moveVelocity(0);
+	// RL.moveVelocity(0);
+	// RR.moveVelocity(0);
 
-	// FL.moveRelative(targetTicks, speed);
-    // FR.moveRelative(targetTicks, speed);
-    // RL.moveRelative(targetTicks, speed);
-    // RR.moveRelative(targetTicks, speed);
-	// while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
-    //     pros::delay(20);
-    // }
+	FL.moveRelative(targetTicks, speed);
+    FR.moveRelative(targetTicks, -speed);
+    RL.moveRelative(targetTicks, speed);
+    RR.moveRelative(targetTicks, -speed);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+}
+
+void rotateRelative(double degrees, double speed) {
+	double arcLength = 2 * M_PI * robotRadius * (degrees / 360.0);
+
+	double targetTicks = arcLength * ticksPerInch / sqrt(2);
+
+	FL.moveRelative(targetTicks, speed);
+    FR.moveRelative(targetTicks, speed);
+    RL.moveRelative(targetTicks, speed);
+    RR.moveRelative(targetTicks, speed);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
 }
 
 /**
@@ -129,7 +145,17 @@ void competition_initialize() {}
  * from where it left off.
  */
 void autonomous() {
-	moveForward(600.0, 12.0);
+	// moveForward(150.0, 12.0);
+	// rotateRelative(360.0, 150.0);
+	FL.moveRelative(-900, 100);
+    FR.moveRelative(-900, 100);
+    RL.moveRelative(-900, 100);
+    RR.moveRelative(-900, 100);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(1000);
+	tower.set_value(1);
 }
 
 /**
@@ -149,6 +175,11 @@ void opcontrol() {
 	int ct = 0;
 	bool intakeOn = false;
 
+	// int intakeTime = 2000;
+	// int intakeStartTime = 0;
+	// bool intakePressed = false;
+	bool intakeReverse = false;
+
 	while (true) {
 		//Handle pneumatics
 		if(master.getDigital(ControllerDigital::L1)) tower.set_value(1);
@@ -156,16 +187,65 @@ void opcontrol() {
 
 		//Handle intake
 		if(intakeOn) {
-			intake.moveVelocity(-200);
-			conveyer.moveVelocity(200);
+			if(!intakeReverse) {
+				intake.moveVelocity(-200);
+				conveyer.moveVelocity(200);
+			} else {
+				intake.moveVelocity(200);
+				conveyer.moveVelocity(-200);
+			}
 		} else {
 			intake.moveVelocity(0);
 			conveyer.moveVelocity(0);
 		}
 
 		if(master.getDigital(ControllerDigital::X)) {
-			if(!intakeOn) intakeOn = true;
-			else intakeOn = false;
+			intakeOn = true;
+			intakeReverse = false;
+			// if(!intakePressed) {
+			// 	intakeStartTime = pros::millis();
+			// 	intakePressed = true;
+			// } else {
+			// 	if(pros::millis() - intakeStartTime >= intakeTime) {
+			// 		if(!intakeOn) intakeOn = true;
+			// 		else intakeOn = false;
+
+			// 		intakePressed = false;
+			// 	}
+			// }
+		}
+
+		if(master.getDigital(ControllerDigital::Y)) {
+			intakeOn = true;
+			intakeReverse = true;
+			// if(!intakePressed) {
+			// 	intakeStartTime = pros::millis();
+			// 	intakePressed = true;
+			// } else {
+			// 	if(pros::millis() - intakeStartTime >= intakeTime) {
+			// 		if(!intakeOn) intakeOn = true;
+			// 		else intakeOn = false;
+
+			// 		intakePressed = false;
+			// 	}
+			// }
+		}
+
+		if(master.getDigital(ControllerDigital::B)) {
+			intakeOn = false;
+
+
+			// if(!intakePressed) {
+			// 	intakeStartTime = pros::millis();
+			// 	intakePressed = true;
+			// } else {
+			// 	if(pros::millis() - intakeStartTime >= intakeTime) {
+			// 		if(!intakeOn) intakeOn = true;
+			// 		else intakeOn = false;
+
+			// 		intakePressed = false;
+			// 	}
+			// }
 		}
 
 		ct++;	
@@ -193,6 +273,8 @@ void opcontrol() {
 		double strafe = master.getAnalog(ControllerAnalog::leftX);
 		double turn = master.getAnalog(ControllerAnalog::rightX);
         double forwardd = master.getAnalog(ControllerAnalog::leftY);
+
+		if(fabs(turn) < 0.5) turn = 0.0;
 	
 		//FL(1)
 		//FR(4)
@@ -205,7 +287,7 @@ void opcontrol() {
 		double RRspeed = forwardd - turn + strafe;
 		double maxSpeed = std::max({fabs(FLspeed), fabs(FRspeed), fabs(RLspeed), fabs(RRspeed)});
 		if (maxSpeed > 0.0) {
-			double scaleFactor = 600.0 / maxSpeed;
+			double scaleFactor = 200.0 / maxSpeed;
 			FLspeed *= scaleFactor;
 			FRspeed *= scaleFactor;
 			RLspeed *= scaleFactor;
@@ -218,17 +300,17 @@ void opcontrol() {
 
 		
 		// Active Breaking
-		 if (fabs(forwardd) > 0 or fabs(strafe) > 0 or fabs(turn) > 0) {
-			 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-			 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-			 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-			 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-		 } else {
-			 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-			 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-			 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-			 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-		 }
+		//  if (fabs(forwardd) > 0 or fabs(strafe) > 0 or fabs(turn) > 0) {
+		// 	 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		// 	 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		// 	 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		// 	 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		//  } else {
+		// 	 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		// 	 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		// 	 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		// 	 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		//  }
 
 
 		pros::delay(20);
