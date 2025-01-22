@@ -27,7 +27,7 @@ double ticksPerInch = ticksPerRev/wheelCicumference;
 double robotRadius = 8.5;
 
 //speed between 0 and 600
-void moveForward(double speed, double distanceInInches) {
+void moveForward(int speed, double distanceInInches) {
 	// double targetHeading = imu_sensor.get_heading();
 	double targetTicks = ((fabs(distanceInInches) * ticksPerInch) / sqrt(2))/64;
 
@@ -62,9 +62,9 @@ void moveForward(double speed, double distanceInInches) {
 	// RR.moveVelocity(0);
 
 	FL.moveRelative(targetTicks, speed);
-    FR.moveRelative(targetTicks, -speed);
+    FR.moveRelative(targetTicks, speed);
     RL.moveRelative(targetTicks, speed);
-    RR.moveRelative(targetTicks, -speed);
+    RR.moveRelative(targetTicks, speed);
 	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
         pros::delay(20);
     }
@@ -76,9 +76,9 @@ void rotateRelative(double degrees, double speed) {
 	double targetTicks = arcLength * ticksPerInch / sqrt(2);
 
 	FL.moveRelative(targetTicks, speed);
-    FR.moveRelative(targetTicks, speed);
+    FR.moveRelative(-targetTicks, speed);
     RL.moveRelative(targetTicks, speed);
-    RR.moveRelative(targetTicks, speed);
+    RR.moveRelative(-targetTicks, speed);
 	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
         pros::delay(20);
     }
@@ -144,18 +144,71 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {
-	// moveForward(150.0, 12.0);
-	// rotateRelative(360.0, 150.0);
-	FL.moveRelative(-900, 100);
-    FR.moveRelative(-900, 100);
-    RL.moveRelative(-900, 100);
-    RR.moveRelative(-900, 100);
+
+void blueLeft() {
+
+	moveForward(40, -2.0);
+	pros::delay(1000);
+	rotateRelative(-20.0,40.0);
+	pros::delay(1000);
+	FL.moveRelative(-750, 40);
+    FR.moveRelative(-750, 40);
+    RL.moveRelative(-750, 40);
+    RR.moveRelative(-750, 40);
 	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
         pros::delay(20);
     }
-	pros::delay(1000);
+	pros::delay(2000);
+	FL.moveRelative(-270, 10);
+    FR.moveRelative(-270, 10);
+    RL.moveRelative(-270, 10);
+    RR.moveRelative(-270, 10);
+	pros::delay(2000);
 	tower.set_value(1);
+	pros::delay(2000);
+	rotateRelative(-40.0,20.0);
+	intake.moveVelocity(200);
+	conveyer.moveVelocity(200);
+	pros::delay(3000);
+	rotateRelative(-32.0, 40.0);
+	intake.moveVelocity(0);
+	conveyer.moveVelocity(0);
+	FL.moveRelative(600, 20);
+    FR.moveRelative(600, 20);
+    RL.moveRelative(600, 20);
+    RR.moveRelative(600, 20);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(2000);
+	intake.moveVelocity(200);
+	conveyer.moveVelocity(200);
+	FL.moveRelative(-300, 40);
+    FR.moveRelative(-300, 40);
+    RL.moveRelative(-300, 40);
+    RR.moveRelative(-300, 40);
+}
+void autonomous() {
+	// moveForward(150.0, 12.0);
+	// rotateRelative(360.0, 150.0);
+	// FL.moveRelative(-900, 100);
+    // FR.moveRelative(-900, 100);
+    // RL.moveRelative(-900, 100);
+    // RR.moveRelative(-900, 100);
+	// while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+    //     pros::delay(20);
+    // }
+	// pros::delay(1000);
+	// tower.set_value(1);
+	// moveForward(50.0, 2.0);
+	// FL.moveRelative(-200, 20);
+    // FR.moveRelative(-200, 20);
+    // RL.moveRelative(-200, 20);
+    // RR.moveRelative(-200, 20);
+	// while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+    //     pros::delay(20);
+    // }
+	blueLeft();
 }
 
 /**
@@ -188,10 +241,10 @@ void opcontrol() {
 		//Handle intake
 		if(intakeOn) {
 			if(!intakeReverse) {
-				intake.moveVelocity(-200);
+				intake.moveVelocity(200);
 				conveyer.moveVelocity(200);
 			} else {
-				intake.moveVelocity(200);
+				intake.moveVelocity(-200);
 				conveyer.moveVelocity(-200);
 			}
 		} else {
@@ -274,7 +327,7 @@ void opcontrol() {
 		double turn = master.getAnalog(ControllerAnalog::rightX);
         double forwardd = master.getAnalog(ControllerAnalog::leftY);
 
-		if(fabs(turn) < 0.5) turn = 0.0;
+		// if(fabs(turn) < 0.5) turn = 0.0;
 	
 		//FL(1)
 		//FR(4)
@@ -287,7 +340,7 @@ void opcontrol() {
 		double RRspeed = forwardd - turn + strafe;
 		double maxSpeed = std::max({fabs(FLspeed), fabs(FRspeed), fabs(RLspeed), fabs(RRspeed)});
 		if (maxSpeed > 0.0) {
-			double scaleFactor = 200.0 / maxSpeed;
+			double scaleFactor = 120.0 / maxSpeed;
 			FLspeed *= scaleFactor;
 			FRspeed *= scaleFactor;
 			RLspeed *= scaleFactor;
