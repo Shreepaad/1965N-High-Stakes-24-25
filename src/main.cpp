@@ -145,7 +145,7 @@ void competition_initialize() {}
  * from where it left off.
  */
 
-void blueLeft() {
+void blueRight() {
 
 	moveForward(40, -2.0);
 	pros::delay(1000);
@@ -158,7 +158,7 @@ void blueLeft() {
 	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
         pros::delay(20);
     }
-	pros::delay(2000);
+	pros::delay(1500);
 	FL.moveRelative(-270, 10);
     FR.moveRelative(-270, 10);
     RL.moveRelative(-270, 10);
@@ -166,28 +166,75 @@ void blueLeft() {
 	pros::delay(2000);
 	tower.set_value(1);
 	pros::delay(2000);
-	rotateRelative(-40.0,20.0);
+	rotateRelative(-40.0,40.0);
+	intake.moveVelocity(200);
+	conveyer.moveVelocity(200);
+	pros::delay(2000);
+	rotateRelative(-25.0, 40.0);
+	// intake.moveVelocity(0);
+	// conveyer.moveVelocity(0);
+	FL.moveRelative(800, 40);
+    FR.moveRelative(800, 40);
+    RL.moveRelative(800, 40);
+    RR.moveRelative(800, 40);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(2000);
+	// intake.moveVelocity(200);
+	// conveyer.moveVelocity(200);
+	// FL.moveRelative(-300, 40);
+    // FR.moveRelative(-300, 40);
+    // RL.moveRelative(-300, 40);
+    // RR.moveRelative(-300, 40);
+}
+
+
+void redLeft() {
+
+	moveForward(40, 2.0);
+	pros::delay(1000);
+	rotateRelative(20.0,40.0);
+	pros::delay(1000);
+	FL.moveRelative(750, 40);
+    FR.moveRelative(750, 40);
+    RL.moveRelative(750, 40);
+    RR.moveRelative(750, 40);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(2000);
+	FL.moveRelative(270, 10);
+    FR.moveRelative(270, 10);
+    RL.moveRelative(270, 10);
+    RR.moveRelative(270, 10);
+	pros::delay(2000);
+	tower.set_value(1);
+	pros::delay(2000);
+	rotateRelative(40.0,20.0);
 	intake.moveVelocity(200);
 	conveyer.moveVelocity(200);
 	pros::delay(3000);
-	rotateRelative(-32.0, 40.0);
+	rotateRelative(32.0, 40.0);
 	intake.moveVelocity(0);
 	conveyer.moveVelocity(0);
-	FL.moveRelative(600, 20);
-    FR.moveRelative(600, 20);
-    RL.moveRelative(600, 20);
-    RR.moveRelative(600, 20);
+	FL.moveRelative(-600, 20);
+    FR.moveRelative(-600, 20);
+    RL.moveRelative(-600, 20);
+    RR.moveRelative(-600, 20);
 	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
         pros::delay(20);
     }
 	pros::delay(2000);
 	intake.moveVelocity(200);
 	conveyer.moveVelocity(200);
-	FL.moveRelative(-300, 40);
-    FR.moveRelative(-300, 40);
-    RL.moveRelative(-300, 40);
-    RR.moveRelative(-300, 40);
+	FL.moveRelative(300, 40);
+    FR.moveRelative(300, 40);
+    RL.moveRelative(300, 40);
+    RR.moveRelative(300, 40);
 }
+
+
 void autonomous() {
 	// moveForward(150.0, 12.0);
 	// rotateRelative(360.0, 150.0);
@@ -208,7 +255,7 @@ void autonomous() {
 	// while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
     //     pros::delay(20);
     // }
-	blueLeft();
+	blueRight();
 }
 
 /**
