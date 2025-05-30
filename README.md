@@ -11,6 +11,8 @@
 - Shreepaad Earanti
 - Ryan Chen
 - Joseph Wang
+- Maxim Charov
+- Atishay Patni
   
 #
 |BUTTON            | FUNCTION       | PORT(S)  |
