@@ -1,20 +1,104 @@
 #include "main.h"
 
+Controller master;
+
+//Right Side Motors are Reversed
+okapi::Motor FL(1);
+okapi::Motor FR(4);
+okapi::Motor RL(5);
+okapi::Motor RR(7);
+	
+pros::ADIDigitalOut tower('A');
+okapi::Motor conveyer(9);
+okapi::Motor intake(10);
+
+pros::IMU imu_sensor(16);
+
+double FLspeed;
+double FRspeed;
+double RLspeed;
+double RRspeed;
+
+double wheelDiameter = 2.75;
+double ticksPerRev = 900.0;
+double wheelCicumference = M_PI * wheelDiameter;
+double ticksPerInch = ticksPerRev/wheelCicumference;
+
+double robotRadius = 8.5;
+
+//speed between 0 and 600
+void moveForward(int speed, double distanceInInches) {
+	// double targetHeading = imu_sensor.get_heading();
+	double targetTicks = ((fabs(distanceInInches) * ticksPerInch) / sqrt(2))/64;
+
+	// FR.tarePosition();
+	// FL.tarePosition();
+	// RL.tarePosition();
+	// RR.tarePosition();
+
+	// double direction = (distanceInInches > 0.0) ? 1.0 : -1.0;
+
+	// while(fabs(FL.getPosition()) < targetTicks) {
+	// 	double currentHeading = imu_sensor.get_heading();
+
+	// 	double error = targetHeading - currentHeading;
+
+	// 	if(error > 180) error -= 360;
+	// 	if(error < -180) error += 360;
+
+	// 	double correction = error * 2;
+
+	// 	FL.moveVelocity(direction * speed + correction);
+	// 	FR.moveVelocity(direction * speed - correction);
+	// 	RL.moveVelocity(direction * speed + correction);
+	// 	RR.moveVelocity(direction * speed - correction);
+
+	// 	pros::delay(20);
+	// }
+	
+	// FL.moveVelocity(0);
+	// FR.moveVelocity(0);
+	// RL.moveVelocity(0);
+	// RR.moveVelocity(0);
+
+	FL.moveRelative(targetTicks, speed);
+    FR.moveRelative(targetTicks, speed);
+    RL.moveRelative(targetTicks, speed);
+    RR.moveRelative(targetTicks, speed);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+}
+
+void rotateRelative(double degrees, double speed) {
+	double arcLength = 2 * M_PI * robotRadius * (degrees / 360.0);
+
+	double targetTicks = arcLength * ticksPerInch / sqrt(2);
+
+	FL.moveRelative(targetTicks, speed);
+    FR.moveRelative(-targetTicks, speed);
+    RL.moveRelative(targetTicks, speed);
+    RR.moveRelative(-targetTicks, speed);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+}
+
 /**
  * A callback function for LLEMU's center button.
  *
  * When this callback is fired, it will toggle line 2 of the LCD text between
  * "I was pressed!" and nothing.
  */
-void on_center_button() {
-	static bool pressed = false;
-	pressed = !pressed;
-	if (pressed) {
-		pros::lcd::set_text(2, "I was pressed!");
-	} else {
-		pros::lcd::clear_line(2);
-	}
-}
+// void on_center_button() {
+// 	static bool pressed = false;
+// 	pressed = !pressed;
+// 	if (pressed) {
+// 		pros::lcd::set_text(2, "I was pressed!");
+// 	} else {
+// 		pros::lcd::clear_line(2);
+// 	}
+// }
 
 /**
  * Runs initialization code. This occurs as soon as the program is started.
@@ -23,10 +107,12 @@ void on_center_button() {
  * to keep execution time for this mode under a few seconds.
  */
 void initialize() {
-	pros::lcd::initialize();
-	pros::lcd::set_text(1, "Hello PROS User!");
+	imu_sensor.reset();
+	pros::delay(2000);
 
-	pros::lcd::register_btn1_cb(on_center_button);
+	FR.setReversed(true);
+    RR.setReversed(true);
+	tower.set_value(0);
 }
 
 /**
@@ -58,7 +144,180 @@ void competition_initialize() {}
  * will be stopped. Re-enabling the robot will restart the task, not re-start it
  * from where it left off.
  */
-void autonomous() {}
+
+void blueRight() {
+
+	// moveForward(60, -2.0);
+	// pros::delay(500);
+	// rotateRelative(-17.0,40.0);
+	// pros::delay(500);
+	FL.moveRelative(-750, 40);
+    FR.moveRelative(-750, 40);
+    RL.moveRelative(-750, 40);
+    RR.moveRelative(-750, 40);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(1200);
+	FL.moveRelative(-270, 10);
+    FR.moveRelative(-270, 10);
+    RL.moveRelative(-270, 10);
+    RR.moveRelative(-270, 10);
+	pros::delay(2000);
+	tower.set_value(1);
+	pros::delay(1000);
+	intake.moveVelocity(200);
+	conveyer.moveVelocity(200);
+	pros::delay(1000);
+	rotateRelative(-35.0,60.0);
+	pros::delay(1000);
+	rotateRelative(-25.0, 60.0);
+	// intake.moveVelocity(0);
+	// conveyer.moveVelocity(0);
+	FL.moveRelative(400, 60);
+    FR.moveRelative(400, 60);
+    RL.moveRelative(400, 60);
+    RR.moveRelative(400, 60);
+
+	pros::delay(500);
+	FL.moveRelative(200, 30);
+    FR.moveRelative(200, 30);
+    RL.moveRelative(200, 30);
+    RR.moveRelative(200, 30);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(2000);
+	intake.moveVelocity(0);
+	conveyer.moveVelocity(0);
+	FL.moveRelative(-800, 100);
+    // FR.moveRelative(600, 30);
+    // RL.moveRelative(600, 30);
+    RR.moveRelative(-800, 100);
+
+	pros::delay(1000);
+	FL.moveRelative(-200, 100);
+    // FR.moveRelative(600, 30);
+    // RL.moveRelative(600, 30);
+    RR.moveRelative(-200, 100);
+	// intake.moveVelocity(200);
+	// conveyer.moveVelocity(200);
+	// FL.moveRelative(-300, 40);
+    // FR.moveRelative(-300, 40);
+    // RL.moveRelative(-300, 40);
+    // RR.moveRelative(-300, 40);
+}
+
+
+void redLeft() {
+
+	// moveForward(60, -2.0);
+	// pros::delay(500);
+	// rotateRelative(20.0,40.0);
+	// pros::delay(500);
+	FL.moveRelative(-750, 30);
+    FR.moveRelative(-750, 30);
+    RL.moveRelative(-750, 30);
+    RR.moveRelative(-750, 30);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(1200);
+	FL.moveRelative(-270, 10);
+    FR.moveRelative(-270, 10);
+    RL.moveRelative(-270, 10);
+    RR.moveRelative(-270, 10);
+	pros::delay(2000);
+	tower.set_value(1);
+	pros::delay(1000);
+	intake.moveVelocity(200);
+	conveyer.moveVelocity(200);
+	pros::delay(1000);
+	rotateRelative(35.0,60.0);
+	pros::delay(1000);
+	rotateRelative(25.0, 60.0);
+	// intake.moveVelocity(0);
+	// conveyer.moveVelocity(0);
+	FL.moveRelative(400, 40);
+    FR.moveRelative(400, 40);
+    RL.moveRelative(400, 40);
+    RR.moveRelative(400, 40);
+
+	pros::delay(1000);
+	FL.moveRelative(200, 30);
+    FR.moveRelative(200, 30);
+    RL.moveRelative(200, 30);
+    RR.moveRelative(200, 30);
+	while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+        pros::delay(20);
+    }
+	pros::delay(1600);
+	intake.moveVelocity(0);
+	conveyer.moveVelocity(0);
+	FR.moveRelative(-800, 100);
+    // FR.moveRelative(600, 30);
+    // RL.moveRelative(600, 30);
+    RL.moveRelative(-800, 100);
+
+	pros::delay(1000);
+	FR.moveRelative(-300, 100);
+    // FR.moveRelative(600, 30);
+    // RL.moveRelative(600, 30);
+    RL.moveRelative(-300, 100);
+	// intake.moveVelocity(200);
+	// conveyer.moveVelocity(200);
+	// FL.moveRelative(-300, 40);
+    // FR.moveRelative(-300, 40);
+    // RL.moveRelative(-300, 40);
+    // RR.moveRelative(-300, 40);
+}
+
+void test() {
+	FL.moveRelative(-750, 40);
+    FR.moveRelative(-750, 40);
+    RL.moveRelative(-750, 40);
+    RR.moveRelative(-750, 40);
+	pros::delay(2000);
+	tower.set_value(1);
+	pros::delay(1000);
+	// rotateRelative(40.0,60.0);
+	pros::delay(1000);
+	intake.moveVelocity(200);
+	conveyer.moveVelocity(200);
+	pros::delay(2000);
+	rotateRelative(-40.0,60.0);
+	pros::delay(2000);
+	FL.moveRelative(-300, 40);
+    FR.moveRelative(-300, 40);
+    RL.moveRelative(-300, 40);
+    RR.moveRelative(-300, 40);
+}
+
+
+void autonomous() {
+	// moveForward(150.0, 12.0);
+	// rotateRelative(360.0, 150.0);
+	// FL.moveRelative(-900, 100);
+    // FR.moveRelative(-900, 100);
+    // RL.moveRelative(-900, 100);
+    // RR.moveRelative(-900, 100);
+	// while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+    //     pros::delay(20);
+    // }
+	// pros::delay(1000);
+	// tower.set_value(1);
+	// moveForward(50.0, 2.0);
+	// FL.moveRelative(-200, 20);
+    // FR.moveRelative(-200, 20);
+    // RL.moveRelative(-200, 20);
+    // RR.moveRelative(-200, 20);
+	// while (!FL.isStopped() || !FR.isStopped() || !RL.isStopped() || !RR.isStopped()) {
+    //     pros::delay(20);
+    // }
+	blueRight();
+	// redLeft();
+	// test();
+}
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -74,139 +333,145 @@ void autonomous() {}
  * task, not resume it from where it left off.
  */
 void opcontrol() {
-	Controller master;
-	// pros::Motor left_mtr(1);
-	// pros::Motor right_mtr(2);
+	int ct = 0;
+	bool intakeOn = false;
 
-	// std::shared_ptr<ChassisController> drive = 
-	// 	ChassisControllerBuilder()
-	// 		.withMotors(1,  // Top left
-	// 					-2, // Top right (reversed)
-	// 					-3, // Bottom right (reversed)
-	// 					4   // Bottom left
-	// 					)
-	// 		.withDimensions(AbstractMotor::gearset::green, {{4_in, 11.5_in}, imev5GreenTPR})
-	// 		.build();
-
-
-	// std::shared_ptr<XDriveModel> drive  = std::make_shared<XDriveModel>(
-    //     std::make_shared<Motor>(5),   // Top left motor
-    //     std::make_shared<Motor>(-4),  // Top right motor (reversed)
-    //     std::make_shared<Motor>(7),  // Bottom right motor (reversed)
-    //     std::make_shared<Motor>(-16),   // Bottom left motor
-	// 	std::make_shared<RotationSensor>(1, false),
-	// 	std::make_shared<RotationSensor>(2, false),
-    //     // 11.5_in  // Track width
-	// 	600.0,
-	// 	12000.0
-    // );
-
-
-	std::shared_ptr<okapi::OdomChassisController> drive1 =
-        okapi::ChassisControllerBuilder()
-                .withMotors(
-								11,
-                                // 5,
-                                -4,
-                                -7,
-                                // 16
-								8
-                           )
-                .withDimensions({okapi::AbstractMotor::gearset::blue, (1.0/1.0)}, {{2.75_in, 10.75_in}, okapi::imev5BlueTPR})
-                .withOdometry()
-                .buildOdometry();
-
-auto drive { std::dynamic_pointer_cast<okapi::XDriveModel>(drive1->getModel()) };
-
-
-	// pros::Motor motor1(5);
-    // pros::Motor motor2(4);  // Reversed
-    // pros::Motor motor3(7);  // Reversed
-    // pros::Motor motor4(16);
-	// Motor motor1(5);
-	// Motor motor2(-4);
-	// Motor motor3(-7);
-	// auto mtr = ADIMotor('A');
-	// pros::adi::DigitalOut test('A', false, false);
-	// pros::ADIMotor mtr('A');
-	pros::ADIDigitalOut test('A');
-	test.set_value(0);
-
-	// Motor motor4(16);
-
-	okapi::Motor conveyer(5);
-	okapi::Motor intake(1);
+	// int intakeTime = 2000;
+	// int intakeStartTime = 0;
+	// bool intakePressed = false;
+	bool intakeReverse = false;
 
 	while (true) {
-		if(master.getDigital(ControllerDigital::L1)) test.set_value(1);
-		else test.set_value(0);
+		//Handle pneumatics
+		if(master.getDigital(ControllerDigital::L1)) tower.set_value(1);
+		else tower.set_value(0);
 
-		// test.set_value(1);
-		// pros::delay(10000);
-		// test.set_value(0);
-
-		// int left = master.get_analog(ANALOG_LEFT_Y);
-		// int right = master.get_analog(ANALOG_RIGHT_Y);
-
-		// left_mtr = left;
-		// right_mtr = right;
-
-		if(master.getDigital(ControllerDigital::X)) {
-			intake.moveVelocity(-200);
-			conveyer.moveVelocity(200);
+		//Handle intake
+		if(intakeOn) {
+			if(!intakeReverse) {
+				intake.moveVelocity(200);
+				conveyer.moveVelocity(200);
+			} else {
+				intake.moveVelocity(-200);
+				conveyer.moveVelocity(-200);
+			}
 		} else {
 			intake.moveVelocity(0);
 			conveyer.moveVelocity(0);
 		}
 
-		// intake.moveVelocity(-200);
-		// motor
+		if(master.getDigital(ControllerDigital::X)) {
+			intakeOn = true;
+			intakeReverse = false;
+			// if(!intakePressed) {
+			// 	intakeStartTime = pros::millis();
+			// 	intakePressed = true;
+			// } else {
+			// 	if(pros::millis() - intakeStartTime >= intakeTime) {
+			// 		if(!intakeOn) intakeOn = true;
+			// 		else intakeOn = false;
+
+			// 		intakePressed = false;
+			// 	}
+			// }
+		}
+
+		if(master.getDigital(ControllerDigital::Y)) {
+			intakeOn = true;
+			intakeReverse = true;
+			// if(!intakePressed) {
+			// 	intakeStartTime = pros::millis();
+			// 	intakePressed = true;
+			// } else {
+			// 	if(pros::millis() - intakeStartTime >= intakeTime) {
+			// 		if(!intakeOn) intakeOn = true;
+			// 		else intakeOn = false;
+
+			// 		intakePressed = false;
+			// 	}
+			// }
+		}
+
+		if(master.getDigital(ControllerDigital::B)) {
+			intakeOn = false;
 
 
-		double forwardd = master.getAnalog(ControllerAnalog::leftY);
-        double strafe = master.getAnalog(ControllerAnalog::leftX);
-        double turn = master.getAnalog(ControllerAnalog::rightX);
-		// std::string s = "";
-		// s += forward;
+			// if(!intakePressed) {
+			// 	intakeStartTime = pros::millis();
+			// 	intakePressed = true;
+			// } else {
+			// 	if(pros::millis() - intakeStartTime >= intakeTime) {
+			// 		if(!intakeOn) intakeOn = true;
+			// 		else intakeOn = false;
 
-		// drive -> getModel() -> xArcade(1.0, 2.0, 3.0, 3.0);
-        drive -> xArcade(strafe, forwardd, turn);
-		// std::string test = "";
-		// test += drive -> getTopLeftMotor() -> getActualVelocity();
+			// 		intakePressed = false;
+			// 	}
+			// }
+		}
 
-		// master.setText(0, 0, test);
+		ct++;	
+		// master.setText(0,0, std::to_string(ct));
+		if(ct == 100) {
+			ct = 0;
+			FLspeed = FL.getActualVelocity();
+			FRspeed = FR.getActualVelocity();
+			RLspeed = RL.getActualVelocity();
+			master.clear();
+			RRspeed = RR.getActualVelocity();
 
+			// master.setText(0, 0, "FL: ");
+			// master.setText(0, 8, "FR: ");
+			// master.setText(1, 0, "RL: ");
+			// master.setText(1, 8, "RR: ");
+		}
+		
+			master.setText(1, 0, "FL: " + std::to_string((FLspeed)).substr(0,4) + " FR: " + std::to_string(FRspeed).substr(0,4));
+			master.setText(2, 0, "RL: " + std::to_string((RLspeed)).substr(0,4) + " RR: " + std::to_string(RRspeed).substr(0,4));
+			// master.setText(0, 10, "FR: " + std::to_string(static_cast<int>(FRspeed)));
+			// master.setText(1, 0, "RL: " + std::to_string(static_cast<int>(RLspeed)));
+			// master.setText(1, 8, "RR: " + std::to_string(static_cast<int>(RRspeed)));
 
+		double strafe = master.getAnalog(ControllerAnalog::leftX);
+		double turn = master.getAnalog(ControllerAnalog::rightX);
+        double forwardd = master.getAnalog(ControllerAnalog::leftY);
 
-			// drive -> xArcade(forward, turn);
-			// drive -> forward(2);
+		// if(fabs(turn) < 0.5) turn = 0.0;
+	
+		//FL(1)
+		//FR(4)
+		//RL(5)
+		//RR(7)
+		
+		double FLspeed = forwardd + turn + strafe;
+		double FRspeed = forwardd - turn - strafe;
+		double RLspeed = forwardd + turn - strafe;
+		double RRspeed = forwardd - turn + strafe;
+		double maxSpeed = std::max({fabs(FLspeed), fabs(FRspeed), fabs(RLspeed), fabs(RRspeed)});
+		if (maxSpeed > 0.0) {
+			double scaleFactor = 120.0 / maxSpeed;
+			FLspeed *= scaleFactor;
+			FRspeed *= scaleFactor;
+			RLspeed *= scaleFactor;
+			RRspeed *= scaleFactor;
+    		}
+		FL.moveVelocity(FLspeed);
+		FR.moveVelocity(FRspeed);
+		RL.moveVelocity(RLspeed);
+		RR.moveVelocity(RRspeed);
 
-
-		// std::cout << forwardd << " " << strafe << " " << turn << std::endl;
-		// double m1speed = forward + turn + strafe;  // Top left
-		// double m2speed = forward - turn - strafe;  // Top right
-		// double m3speed = forward + turn - strafe;  // Bottom right
-		// double m4speed = forward - turn + strafe;  // Bottom left
-		// double maxSpeed = std::max({fabs(m1speed), fabs(m2speed), fabs(m3speed), fabs(m4speed)});
-		// if (maxSpeed > 0.0) {
-		// 	double scaleFactor = 600.0 / maxSpeed;
-		// 	m1speed *= scaleFactor;
-		// 	m2speed *= scaleFactor;
-		// 	m3speed *= scaleFactor;
-		// 	m4speed *= scaleFactor;
-    	// }
-		// motor1.moveVelocity(m1speed);
-		// motor2.moveVelocity(m2speed);
-		// motor3.moveVelocity(m3speed);
-		// motor4.moveVelocity(m4speed);
-
-		 if (forwardd > 0 or strafe > 0 or turn > 0) {
-                                drive->setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
-                        }
-                        else {
-                                drive->setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
-                        }
-
+		
+		// Active Breaking
+		//  if (fabs(forwardd) > 0.05 or fabs(strafe) > 0.05 or fabs(turn) > 0.05) {
+		// 	 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		// 	 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		// 	 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		// 	 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::coast);
+		//  } else {
+		// 	 FL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		// 	 FR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		// 	 RL.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		// 	 RR.setBrakeMode(okapi::AbstractMotor::brakeMode::hold);
+		//  }
 
 
 		pros::delay(20);
