@@ -7,7 +7,6 @@
 
 ## **The Team:**
 - Dylan Patel
-- Luke Sikora
 - Matthew Okladlo
 - Shreepaad Earanti
 - Ryan Chen
@@ -31,4 +30,4 @@
 | `    14   `| String extender      |     HOLD Down   |
 
 
-## LAST EDIT: (9/26/2024), 5:18 PM 
+## LAST EDIT: (1/25/2025), 3:42 PM 
